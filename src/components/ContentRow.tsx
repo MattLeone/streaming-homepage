@@ -10,7 +10,7 @@ interface Props {
     onMaxIndexChange: (maxIndex: number) => void;
 }
 
-export default function ContentRow({ container, isActive, focusedIndex, onMaxIndexChange }: Props) {
+const ContentRow: React.FC<Props> = ({ container, isActive, focusedIndex, onMaxIndexChange }) => {
     const [items, setItems] = useState<TileItem[]>(container.items || [])
     const [loading, setLoading] = useState(container.type === 'SetRef')
     const tileRefs = useRef<(HTMLDivElement | null)[]>([])
@@ -18,31 +18,35 @@ export default function ContentRow({ container, isActive, focusedIndex, onMaxInd
     const removeItem = (index: number) => {
         setItems(prev => prev.filter((_, i) => i !== index))
     }
-
+    
     useEffect(() => {
         onMaxIndexChange(Math.max(0, items.length - 1))
     }, [items.length, onMaxIndexChange])
-
+    
     useEffect(() => {
         const tile = tileRefs.current[focusedIndex]
         if (isActive && tile && focusedIndex < items.length) {
-            tile.scrollIntoView({ behavior: 'smooth', inline: 'center' })
+            tile.scrollIntoView({ 
+                behavior: 'smooth', 
+                inline: 'center',
+                block: 'nearest'
+            })
         }
     }, [isActive, focusedIndex, items.length])
-
+    
     useEffect(() => {
         if (container.type === 'SetRef' && container.refId) {
             fetchSetRefItems(container.refId).then(setItems).finally(() => setLoading(false))
         }
     }, [container])
-
+    
     if (loading) return (
         <div className="content-row">
             <h2>{container.title}</h2>
             <div className="loading">Loading magical content...</div>
         </div>
     )
-
+    
     return (
         <div className="content-row">
             <h2>{container.title}</h2>
@@ -60,3 +64,5 @@ export default function ContentRow({ container, isActive, focusedIndex, onMaxInd
         </div>
     )
 }
+
+export default ContentRow;
